@@ -171,4 +171,41 @@ class MaxRectsBl extends MaxRects {
   }
 }
 
-export { MaxRects, MaxRectsBl };
+class MaxRectsBssf extends MaxRects {
+  /**
+   * Best Short Side Fit minimize short leftover side
+   */
+  _rect_fitness(maxRect: Rectangle, width: number, height: number): number | null {
+    if (width > maxRect.width || height > maxRect.height) {
+      return null;
+    }
+    return Math.min(maxRect.width - width, maxRect.height - height);
+  }
+}
+
+class MaxRectsBaf extends MaxRects {
+  /**
+   * Best Area Fit pick maximal rectangle with smallest area
+   * where the rectangle can be placed
+   */
+  _rect_fitness(maxRect: Rectangle, width: number, height: number): number | null {
+    if (width > maxRect.width || height > maxRect.height) {
+      return null;
+    }
+    return maxRect.width * maxRect.height - width * height;
+  }
+}
+
+class MaxRectsBlsf extends MaxRects {
+  /**
+   * Best Long Side Fit minimize long leftover side
+   */
+  _rect_fitness(maxRect: Rectangle, width: number, height: number): number | null {
+    if (width > maxRect.width || height > maxRect.height) {
+      return null;
+    }
+    return Math.max(maxRect.width - width, maxRect.height - height);
+  }
+}
+
+export { MaxRects, MaxRectsBl, MaxRectsBssf, MaxRectsBaf, MaxRectsBlsf };
