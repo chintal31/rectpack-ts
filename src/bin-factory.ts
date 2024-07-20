@@ -1,15 +1,15 @@
-import { PackingAlgorithm as Bin, PackingAlgorithmInstance } from '@src/packing-algorithm';
+import { PackingAlgorithm as Bin, PackingAlgorithmClass } from '@src/packing-algorithm';
 
 class BinFactory {
   private _width: number;
   private _height: number;
   private _count: number;
-  private _pack_algo: PackingAlgorithmInstance;
+  private _pack_algo: PackingAlgorithmClass;
   private _algo_kwargs: Record<string, any>;
   private _algo_args: any[];
   private _ref_bin: Bin | null = null;
 
-  constructor(width: number, height: number, count: number, pack_algo: PackingAlgorithmInstance, ...args: any[]) {
+  constructor(width: number, height: number, count: number, pack_algo: PackingAlgorithmClass, ...args: any[]) {
     this._width = width;
     this._height = height;
     this._count = count;

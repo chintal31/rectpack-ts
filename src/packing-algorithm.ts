@@ -66,10 +66,25 @@ abstract class PackingAlgorithm {
   reset(): void {
     this.rectangles = [];
   }
+
+  [Symbol.iterator](): Iterator<{ width: number; height: number; rid?: string }> {
+    let index = 0;
+    const rectangles = this.rectangles;
+
+    return {
+      next(): IteratorResult<{ width: number; height: number; rid?: string }> {
+        if (index < rectangles.length) {
+          return { value: rectangles[index++], done: false };
+        } else {
+          return { value: null, done: true };
+        }
+      },
+    };
+  }
 }
 
 type PackingAlgorithms = MaxRectsBl | MaxRects;
 
-type PackingAlgorithmInstance = new (...args: any[]) => PackingAlgorithms;
+type PackingAlgorithmClass = new (...args: any[]) => PackingAlgorithms;
 
-export { PackingAlgorithm, PackingAlgorithms, PackingAlgorithmInstance };
+export { PackingAlgorithm, PackingAlgorithms, PackingAlgorithmClass };

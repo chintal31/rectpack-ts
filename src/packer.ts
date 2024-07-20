@@ -1,16 +1,16 @@
 import { BinFactory } from '@src/bin-factory';
-import { PackingAlgorithmInstance, PackingAlgorithm as Bin } from '@src/packing-algorithm';
+import { PackingAlgorithmClass, PackingAlgorithm as Bin } from '@src/packing-algorithm';
 import { SORT_AREA } from '@src/sorting-algo';
 
 class PackerOnline {
   private _rotation: boolean;
-  private _pack_algo: PackingAlgorithmInstance;
-  private _closed_bins: Bin[] = [];
+  private _pack_algo: PackingAlgorithmClass;
+  protected _closed_bins: Bin[] = [];
   protected _open_bins: Bin[] = [];
   private _empty_bins: Map<number, BinFactory> = new Map();
   private _bin_count = 0;
 
-  constructor(pack_algo: PackingAlgorithmInstance, rotation = true) {
+  constructor(pack_algo: PackingAlgorithmClass, rotation = true) {
     this._rotation = rotation;
     this._pack_algo = pack_algo;
     this.reset();
@@ -47,7 +47,7 @@ class PackerOnline {
     }
   }
 
-  protected _newOpenBin(width: number | null = null, height: number | null = null): Bin | null {
+  protected _newOpenBin(width: number | null = null, height: number | null = null, _rid: string | null = null): Bin | null {
     const factoriesToDelete: number[] = [];
     let newBin: Bin | null = null;
 
@@ -114,15 +114,15 @@ class PackerOnline {
   }
 }
 
-class Packer extends PackerOnline {
-  private _sort_algo: (rectangles: any[]) => any[];
+class PackerBase extends PackerOnline {
+  private _sortAlgo: (rectangles: any[]) => any[];
   private _avail_bins: [number, number, number, any][] = [];
   private _avail_rect: [number, number, any][] = [];
   private _sorted_rect: any[] = [];
 
-  constructor(pack_algo: PackingAlgorithmInstance, sort_algo: (rectangles: any[]) => any[] = SORT_AREA, rotation = true) {
+  constructor(pack_algo: PackingAlgorithmClass, sort_algo: (rectangles: any[]) => any[] = SORT_AREA, rotation = true) {
     super(pack_algo, rotation);
-    this._sort_algo = sort_algo;
+    this._sortAlgo = sort_algo;
   }
 
   addBin(width: number, height: number, count = 1, extraParams: any = {}) {
@@ -148,24 +148,24 @@ class Packer extends PackerOnline {
       super.addBin(width, height, count, extraParams);
     }
 
-    this._sorted_rect = this._sort_algo(this._avail_rect);
+    this._sorted_rect = this._sortAlgo(this._avail_rect);
 
     for (const rect of this._sorted_rect) {
-      (this as unknown as PackerBBFMixin).addRectBbf(...(rect as [number, number, any]));
+      (this as unknown as PackerBBFMixin | PackerBNFMixin | PackerBFFMixin).fitRect(...(rect as [number, number, any]));
     }
   }
 }
 
 class PackerBBFMixin extends PackerOnline {
   // Define item getter function (equivalent to Python's operator.itemgetter)
-  private first_item = <T>(arr: T[]): T => arr[0];
+  private firstItem = <T>(arr: T[]): T => arr[0];
 
-  addRectBbf(width: number, height: number, rid?: any): boolean {
+  fitRect(width: number, height: number, rid?: any): boolean {
     // Try packing into open bins
     const fit = this._open_bins.map((b) => [b.fitness(width, height), b]).filter(([fit]) => fit !== null);
 
     try {
-      const [, best_bin] = fit.reduce((min, current) => (this.first_item(current) < this.first_item(min) ? current : min));
+      const [, best_bin] = fit.reduce((min, current) => (this.firstItem(current) < this.firstItem(min) ? current : min));
       (best_bin as Bin).addRect(width, height, rid);
       return true;
     } catch (error) {
@@ -186,6 +186,69 @@ class PackerBBFMixin extends PackerOnline {
   }
 }
 
+class PackerBNFMixin extends PackerOnline {
+  /**
+   * BNF (Bin Next Fit): Only one open bin at a time.  If the rectangle
+   * doesn't fit, close the current bin and go to the next.
+   */
+
+  fitRect(width: number, height: number, rid?: string): { width: number; height: number; rid?: string } | null {
+    while (true) {
+      // if there are no open bins, try to open a new one
+      if (this._open_bins.length === 0) {
+        // can we find an unopened bin that will hold this rect?
+        const newBin = this._newOpenBin(width, height, rid);
+        if (newBin === null) {
+          return null;
+        }
+      }
+
+      // we have at least one open bin, so check if it can hold this rect
+      const rect = this._open_bins[0].addRect(width, height, rid);
+      if (rect !== null) {
+        return rect;
+      }
+
+      // since the rect doesn't fit, close this bin and try again
+      const closedBin = this._open_bins.shift();
+      if (closedBin) {
+        this._closed_bins.push(closedBin);
+      }
+    }
+  }
+}
+
+class PackerBFFMixin extends PackerOnline {
+  /**
+   * BFF (Bin First Fit): Pack rectangle in first bin it fits
+   */
+
+  fitRect(width: number, height: number, rid?: string): { width: number; height: number; rid?: string } | null {
+    // see if this rect will fit in any of the open bins
+    for (const b of this._open_bins) {
+      const rect = b.addRect(width, height, rid);
+      if (rect !== null) {
+        return rect;
+      }
+    }
+
+    while (true) {
+      // can we find an unopened bin that will hold this rect?
+      const newBin = this._newOpenBin(width, height, rid);
+      if (newBin === null) {
+        return null;
+      }
+
+      // _newOpenBin may return a bin that's too small,
+      // so we have to double-check
+      const rect = newBin.addRect(width, height, rid);
+      if (rect !== null) {
+        return rect;
+      }
+    }
+  }
+}
+
 type Constructor<T = object> = new (...args: any[]) => T;
 
 function applyMixins(derivedCtor: Constructor, baseCtors: Constructor[]) {
@@ -196,10 +259,28 @@ function applyMixins(derivedCtor: Constructor, baseCtors: Constructor[]) {
   });
 }
 
-class PackerBBF extends Packer {
+class PackerBBF extends PackerBase {
   // Empty class but will have methods from PackerBBFMixin via mixin
 }
 
-applyMixins(PackerBBF, [PackerBBFMixin]);
+class PackerBNF extends PackerBase {
+  // Empty class but will have methods from PackerBNFMixin via mixin
+}
 
-export { PackerBBF };
+class PackerBFF extends PackerBase {
+  // Empty class but will have methods from PackerBFFMixin via mixin
+}
+
+applyMixins(PackerBBF, [PackerBBFMixin]);
+applyMixins(PackerBNF, [PackerBNFMixin]);
+applyMixins(PackerBFF, [PackerBFFMixin]);
+
+type PackagingBinClass = new (...args: any[]) => PackerBBF | PackerBNF | PackerBFF;
+
+class Packer {
+  constructor(binAlgo: PackagingBinClass, pack_algo: PackingAlgorithmClass, sort_algo: (rectangles: any[]) => any[] = SORT_AREA, rotation = true) {
+    return new binAlgo(pack_algo, sort_algo, rotation);
+  }
+}
+
+export { PackerBBF, Packer };

@@ -42,7 +42,7 @@ class MaxRects extends PackingAlgorithm {
     return [new Rectangle(maxRect.x, maxRect.y, width, height), maxRect];
   }
 
-  private _generateSplits(m: Rectangle, r: Rectangle): Rectangle[] {
+  generateSplits(m: Rectangle, r: Rectangle): Rectangle[] {
     const newRects: Rectangle[] = [];
     if (r.left > m.left) {
       newRects.push(new Rectangle(m.left, m.bottom, r.left - m.left, m.height));
@@ -59,12 +59,12 @@ class MaxRects extends PackingAlgorithm {
     return newRects;
   }
 
-  private _split(rect: Rectangle): void {
+  split(rect: Rectangle): void {
     const maxRects: Rectangle[] = [];
 
     for (const r of this._maxRects) {
       if (r.intersects(rect)) {
-        maxRects.push(...this._generateSplits(r, rect));
+        maxRects.push(...this.generateSplits(r, rect));
       } else {
         maxRects.push(r);
       }
@@ -111,12 +111,6 @@ class MaxRects extends PackingAlgorithm {
     }
   }
 
-  *[Symbol.iterator](): Generator<Rectangle, void, void> {
-    for (const rect of this._maxRects) {
-      yield rect;
-    }
-  }
-
   fitness(width: number, height: number): number | null {
     const [rect, maxRect] = this._selectPosition(width, height);
     if (!rect) {
@@ -131,7 +125,7 @@ class MaxRects extends PackingAlgorithm {
     if (!rect) {
       return null;
     }
-    this._split(rect);
+    this.split(rect);
     this.removeDuplicates();
     rect.rid = rid;
     this.rectangles.push(rect);
@@ -145,8 +139,8 @@ class MaxRects extends PackingAlgorithm {
 }
 
 class MaxRectsBl extends MaxRects {
-  constructor(width: number, height: number) {
-    super(width, height);
+  constructor(width: number, height: number, rot = true) {
+    super(width, height, rot);
   }
 
   protected _selectPosition(w: number, h: number): [Rectangle | null, Rectangle | null] {
@@ -175,7 +169,7 @@ class MaxRectsBssf extends MaxRects {
   /**
    * Best Short Side Fit minimize short leftover side
    */
-  _rect_fitness(maxRect: Rectangle, width: number, height: number): number | null {
+  _rectFitness(maxRect: Rectangle, width: number, height: number): number | null {
     if (width > maxRect.width || height > maxRect.height) {
       return null;
     }
@@ -188,7 +182,7 @@ class MaxRectsBaf extends MaxRects {
    * Best Area Fit pick maximal rectangle with smallest area
    * where the rectangle can be placed
    */
-  _rect_fitness(maxRect: Rectangle, width: number, height: number): number | null {
+  _rectFitness(maxRect: Rectangle, width: number, height: number): number | null {
     if (width > maxRect.width || height > maxRect.height) {
       return null;
     }
@@ -200,7 +194,7 @@ class MaxRectsBlsf extends MaxRects {
   /**
    * Best Long Side Fit minimize long leftover side
    */
-  _rect_fitness(maxRect: Rectangle, width: number, height: number): number | null {
+  _rectFitness(maxRect: Rectangle, width: number, height: number): number | null {
     if (width > maxRect.width || height > maxRect.height) {
       return null;
     }
