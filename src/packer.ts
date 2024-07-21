@@ -30,7 +30,7 @@ class PackerOnline {
     return this._closed_bins.length + this._open_bins.length;
   }
 
-  getItem(key: number): Bin {
+  getBin(key: number): Bin {
     if (!Number.isInteger(key)) {
       throw new TypeError('Indices must be integers');
     }
@@ -295,7 +295,7 @@ applyMixins(PackerBBF, [PackerBBFMixin]);
 applyMixins(PackerBNF, [PackerBNFMixin]);
 applyMixins(PackerBFF, [PackerBFFMixin]);
 
-type PackagingBinClass = new (...args: any[]) => PackerBBF | PackerBNF | PackerBFF;
+type PackageBin = new (...args: any[]) => PackerBBF | PackerBNF | PackerBFF;
 
 class Packer {
   private packerInstance: PackerBase;
@@ -306,7 +306,7 @@ class Packer {
     sortAlgo = SORT_AREA,
     rotation = true,
   }: {
-    binAlgo?: PackagingBinClass;
+    binAlgo?: PackageBin;
     packAlgo?: PackingAlgorithmClass;
     sortAlgo?: Sorting;
     rotation?: boolean;
@@ -318,8 +318,8 @@ class Packer {
     return this.packerInstance.numberOfBins;
   }
 
-  getItem(key: number): Bin {
-    return this.packerInstance.getItem(key);
+  getBin(key: number): Bin {
+    return this.packerInstance.getBin(key);
   }
 
   addBin(width: number, height: number, count = 1, extraParams: any = {}) {
@@ -364,5 +364,5 @@ export {
   PackerBNFMixin,
   PackerBFFMixin,
   PackingAlgorithmClass,
-  PackagingBinClass,
+  PackageBin,
 };

@@ -1,6 +1,6 @@
-import { PackagingBinClass, Packer, PackerBBF, PackerBFF, PackerBNF } from '@src/packer';
+import { PackageBin, Packer, PackerBBF, PackerBFF, PackerBNF } from '@src/packer';
 
-function common(binAlgo: PackagingBinClass, binWidth: number, binHeight: number, rectangles: [number, number][]): Packer {
+function common(binAlgo: PackageBin, binWidth: number, binHeight: number, rectangles: [number, number][]): Packer {
   const p = new Packer({ binAlgo });
   p.addBin(binWidth, binHeight, rectangles.length);
   for (const [w, h] of rectangles) {

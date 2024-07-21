@@ -266,7 +266,7 @@ describe('MaxRects', () => {
     });
   });
 
-  test('getitem', () => {
+  test('getBin', () => {
     const m = new MaxRects(100, 100, false);
     m.addRect(40, 40);
     m.addRect(20, 20);
