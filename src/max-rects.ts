@@ -4,7 +4,7 @@ import { PackingAlgorithm } from '@src/packing-algorithm';
 class MaxRects extends PackingAlgorithm {
   protected _maxRects: Rectangle[];
 
-  constructor(width: number, height: number, rot = true) {
+  constructor(width: number, height: number, rot: boolean) {
     super(width, height, rot);
     this._maxRects = [new Rectangle(0, 0, width, height)];
   }
@@ -139,10 +139,6 @@ class MaxRects extends PackingAlgorithm {
 }
 
 class MaxRectsBl extends MaxRects {
-  constructor(width: number, height: number, rot = true) {
-    super(width, height, rot);
-  }
-
   protected _selectPosition(w: number, h: number): [Rectangle | null, Rectangle | null] {
     const fitn = this._maxRects
       .map((m) => [m.y + h, m.x, w, h, m] as [number, number, number, number, Rectangle])

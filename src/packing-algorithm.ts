@@ -1,5 +1,5 @@
 import { Rectangle } from '@src/geometry';
-import { MaxRects, MaxRectsBl } from '@src/max-rects';
+import { MaxRectsBaf, MaxRectsBl, MaxRectsBlsf, MaxRectsBssf } from '@src/max-rects';
 
 abstract class PackingAlgorithm {
   width: number;
@@ -83,7 +83,7 @@ abstract class PackingAlgorithm {
   }
 }
 
-type PackingAlgorithms = MaxRectsBl | MaxRects;
+type PackingAlgorithms = MaxRectsBl | MaxRectsBssf | MaxRectsBaf | MaxRectsBlsf;
 
 type PackingAlgorithmClass = new (...args: any[]) => PackingAlgorithms;
 

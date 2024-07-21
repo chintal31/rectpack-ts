@@ -1,18 +1,23 @@
 import { BinFactory } from '@src/bin-factory';
 import { PackingAlgorithmClass, PackingAlgorithm as Bin } from '@src/packing-algorithm';
-import { SORT_AREA } from '@src/sorting-algo';
+import { SORT_AREA, SORT_NONE, Sorting } from '@src/sorting';
+import { MaxRectsBssf } from '@src/max-rects';
+
+type PackerBin = [number, number, number, string | null];
+type PackerRect = [number, number, string | null];
+type RectangleWithBinCount = [number, number, number, number, number, string | null];
 
 class PackerOnline {
   private _rotation: boolean;
-  private _pack_algo: PackingAlgorithmClass;
+  private _packAlgo: PackingAlgorithmClass;
   protected _closed_bins: Bin[] = [];
   protected _open_bins: Bin[] = [];
   private _empty_bins: Map<number, BinFactory> = new Map();
   private _bin_count = 0;
 
-  constructor(pack_algo: PackingAlgorithmClass, rotation = true) {
+  constructor(packAlgo: PackingAlgorithmClass, rotation = true) {
     this._rotation = rotation;
-    this._pack_algo = pack_algo;
+    this._packAlgo = packAlgo;
     this.reset();
   }
 
@@ -76,14 +81,13 @@ class PackerOnline {
     return newBin;
   }
 
-  addBin(width: number, height: number, count = 1, extraParams: any = {}) {
-    extraParams['rot'] = this._rotation;
-    const binFactory = new BinFactory(width, height, count, this._pack_algo, extraParams);
+  addBin(width: number, height: number, count = 1) {
+    const binFactory = new BinFactory(width, height, count, this._packAlgo, this._rotation);
     this._empty_bins.set(this._bin_count++, binFactory);
   }
 
-  rectList(): any[] {
-    const rectangles: any[] = [];
+  rectList(): RectangleWithBinCount[] {
+    const rectangles: RectangleWithBinCount[] = [];
     let binCount = 0;
 
     for (const bin of this) {
@@ -115,14 +119,22 @@ class PackerOnline {
 }
 
 class PackerBase extends PackerOnline {
-  private _sortAlgo: (rectangles: any[]) => any[];
-  private _avail_bins: [number, number, number, any][] = [];
-  private _avail_rect: [number, number, any][] = [];
-  private _sorted_rect: any[] = [];
+  private _sortAlgo: (rectangles: PackerRect[]) => PackerRect[];
+  private _avail_bins: PackerBin[] = [];
+  private _avail_rect: PackerRect[] = [];
+  private _sorted_rect: PackerRect[] = [];
 
-  constructor(pack_algo: PackingAlgorithmClass, sort_algo: (rectangles: any[]) => any[] = SORT_AREA, rotation = true) {
-    super(pack_algo, rotation);
-    this._sortAlgo = sort_algo;
+  constructor({
+    packAlgo = MaxRectsBssf,
+    sortAlgo = SORT_NONE,
+    rotation = true,
+  }: {
+    packAlgo?: PackingAlgorithmClass;
+    sortAlgo?: Sorting;
+    rotation?: boolean;
+  } = {}) {
+    super(packAlgo, rotation);
+    this._sortAlgo = sortAlgo;
   }
 
   addBin(width: number, height: number, count = 1, extraParams: any = {}) {
@@ -144,33 +156,41 @@ class PackerBase extends PackerOnline {
       return;
     }
 
-    for (const [width, height, count, extraParams] of this._avail_bins) {
-      super.addBin(width, height, count, extraParams);
+    for (const [width, height, count] of this._avail_bins) {
+      super.addBin(width, height, count);
     }
 
     this._sorted_rect = this._sortAlgo(this._avail_rect);
 
     for (const rect of this._sorted_rect) {
-      (this as unknown as PackerBBFMixin | PackerBNFMixin | PackerBFFMixin).fitRect(...(rect as [number, number, any]));
+      (this as unknown as PackerBBFMixin | PackerBNFMixin | PackerBFFMixin).fitRect(...rect);
     }
   }
 }
 
+const firstItem = (array: [number, Bin]): number => {
+  return array[0];
+};
 class PackerBBFMixin extends PackerOnline {
   // Define item getter function (equivalent to Python's operator.itemgetter)
-  private firstItem = <T>(arr: T[]): T => arr[0];
 
   fitRect(width: number, height: number, rid?: any): boolean {
     // Try packing into open bins
-    const fit = this._open_bins.map((b) => [b.fitness(width, height), b]).filter(([fit]) => fit !== null);
+    let fit: [number, Bin][] = this._open_bins.map((b) => [b.fitness(width, height), b]);
+    fit = fit.filter(([fitness, _bin]) => fitness !== null);
 
     try {
-      const [, best_bin] = fit.reduce((min, current) => (this.firstItem(current) < this.firstItem(min) ? current : min));
-      (best_bin as Bin).addRect(width, height, rid);
+      const [, best_bin] = fit.reduce((min, current) => (firstItem(current) < firstItem(min) ? current : min));
+      best_bin.addRect(width, height, rid);
       return true;
     } catch (error) {
-      // Handle error as needed
-      console.error(error);
+      if (error instanceof TypeError && error.message.includes('Reduce of empty array with no initial value')) {
+        // console.log('Caught specific TypeError: Reduce of empty array with no initial value. No action needed.');
+      } else {
+        // Rethrow or handle other errors
+        console.error('Unexpected error:', error);
+        throw error;
+      }
     }
 
     // Try packing into a new open bin
@@ -278,9 +298,71 @@ applyMixins(PackerBFF, [PackerBFFMixin]);
 type PackagingBinClass = new (...args: any[]) => PackerBBF | PackerBNF | PackerBFF;
 
 class Packer {
-  constructor(binAlgo: PackagingBinClass, pack_algo: PackingAlgorithmClass, sort_algo: (rectangles: any[]) => any[] = SORT_AREA, rotation = true) {
-    return new binAlgo(pack_algo, sort_algo, rotation);
+  private packerInstance: PackerBase;
+
+  constructor({
+    binAlgo = PackerBBF,
+    packAlgo = MaxRectsBssf,
+    sortAlgo = SORT_AREA,
+    rotation = true,
+  }: {
+    binAlgo?: PackagingBinClass;
+    packAlgo?: PackingAlgorithmClass;
+    sortAlgo?: Sorting;
+    rotation?: boolean;
+  } = {}) {
+    this.packerInstance = new binAlgo(packAlgo, sortAlgo, rotation);
+  }
+
+  get numberOfBins() {
+    return this.packerInstance.numberOfBins;
+  }
+
+  getItem(key: number): Bin {
+    return this.packerInstance.getItem(key);
+  }
+
+  addBin(width: number, height: number, count = 1, extraParams: any = {}) {
+    this.packerInstance.addBin(width, height, count, extraParams);
+  }
+
+  addRect(width: number, height: number, rid: any = null) {
+    this.packerInstance.addRect(width, height, rid);
+  }
+
+  rectList(): any[] {
+    return this.packerInstance.rectList();
+  }
+
+  binList(): [number, number][] {
+    return this.packerInstance.binList();
+  }
+
+  validatePacking() {
+    this.packerInstance.validatePacking();
+  }
+
+  pack() {
+    this.packerInstance.pack();
+  }
+
+  reset() {
+    this.packerInstance.reset();
   }
 }
 
-export { PackerBBF, Packer };
+export {
+  PackerBBF,
+  Packer,
+  PackerRect,
+  PackerBin,
+  PackerBNF,
+  PackerBFF,
+  PackerOnline,
+  PackerBase,
+  PackerBBFMixin,
+  PackerBNFMixin,
+  PackerBFFMixin,
+  PackingAlgorithmClass,
+  PackagingBinClass,
+};
