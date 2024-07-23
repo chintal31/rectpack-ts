@@ -1,5 +1,4 @@
 import { Rectangle } from '@src/geometry';
-import { MaxRectsBaf, MaxRectsBl, MaxRectsBlsf, MaxRectsBssf } from '@src/max-rects';
 
 abstract class PackingAlgorithm {
   width: number;
@@ -38,8 +37,8 @@ abstract class PackingAlgorithm {
 
   abstract addRect(width: number, height: number, rid?: any): Rectangle | null;
 
-  rectList(): [number, number, number, number, any][] {
-    return this.rectangles.map((rect) => [rect.x, rect.y, rect.width, rect.height, rect.rid]);
+  rectList(): Rectangle[] {
+    return this.rectangles;
   }
 
   validatePacking(): void {
@@ -83,8 +82,4 @@ abstract class PackingAlgorithm {
   }
 }
 
-type PackingAlgorithms = MaxRectsBl | MaxRectsBssf | MaxRectsBaf | MaxRectsBlsf;
-
-type PackingAlgorithmClass = new (...args: any[]) => PackingAlgorithms;
-
-export { PackingAlgorithm, PackingAlgorithms, PackingAlgorithmClass };
+export { PackingAlgorithm };

@@ -1,4 +1,5 @@
-import { PackingAlgorithm as Bin, PackingAlgorithmClass } from '@src/packing-algorithm';
+import { PackingAlgorithm as Bin } from '@src/packing-algorithm';
+import { PackingAlgorithmClass } from '@src/types';
 
 class BinFactory {
   private _width: number;
@@ -16,32 +17,32 @@ class BinFactory {
     this._packAlgo = packAlgo;
   }
 
-  private _create_bin() {
+  private _createBin() {
     return new (this._packAlgo as unknown as new (width: number, height: number, ...args: any[]) => Bin)(this._width, this._height, this._rot);
   }
 
-  is_empty(): boolean {
+  isEmpty(): boolean {
     return this._count < 1;
   }
 
   fitness(width: number, height: number): number | null {
     if (!this._refBin) {
-      this._refBin = this._create_bin();
+      this._refBin = this._createBin();
     }
     return this._refBin.fitness(width, height);
   }
 
-  fits_inside(width: number, height: number): boolean {
+  fitsInside(width: number, height: number): boolean {
     if (!this._refBin) {
-      this._refBin = this._create_bin();
+      this._refBin = this._createBin();
     }
     return this._refBin._fitsSurface(width, height);
   }
 
-  new_bin(): Bin | null {
+  newBin(): Bin | null {
     if (this._count > 0) {
       this._count -= 1;
-      return this._create_bin();
+      return this._createBin();
     } else {
       return null;
     }

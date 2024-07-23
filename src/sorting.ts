@@ -1,4 +1,4 @@
-import { PackerRect } from '@src/packer';
+import { Sorting, PackerRect } from '@src/types';
 
 const SORT_AREA = (rectlist: PackerRect[]): PackerRect[] => {
   return rectlist.sort((r1, r2) => r2[0] * r2[1] - r1[0] * r1[1]); // Sort by area
@@ -41,7 +41,5 @@ const SORT_RATIO = (rectlist: PackerRect[]): PackerRect[] => {
 const SORT_NONE = (rectlist: PackerRect[]): PackerRect[] => {
   return rectlist; // Unsorted
 };
-
-type Sorting = typeof SORT_AREA | typeof SORT_PERI | typeof SORT_DIFF | typeof SORT_SSIDE | typeof SORT_LSIDE | typeof SORT_RATIO | typeof SORT_NONE;
 
 export { Sorting, SORT_AREA, SORT_PERI, SORT_DIFF, SORT_SSIDE, SORT_LSIDE, SORT_RATIO, SORT_NONE };

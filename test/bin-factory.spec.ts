@@ -1,4 +1,7 @@
-import { PackageBin, Packer, PackerBBF, PackerBFF, PackerBNF } from '@src/packer';
+import { Packer } from '@src/packer';
+import { PackerBBF, PackerBNF, PackerBFF } from '@src/packer-mixins';
+import { PackingAlgorithm } from '@src/packing-algorithm';
+import { PackageBin } from '@src/types';
 
 function common(binAlgo: PackageBin, binWidth: number, binHeight: number, rectangles: [number, number][]): Packer {
   const p = new Packer({ binAlgo });
@@ -22,6 +25,47 @@ describe('Bin factory', () => {
 
   afterEach(() => {
     rectangles = [];
+  });
+
+  test('Packer APIs', () => {
+    const p = common(PackerBBF, 50, 50, rectangles);
+    // Obtain number of bins used for packing
+    const nbins = p.numberOfBins;
+    expect(nbins).toBeGreaterThan(0);
+
+    // Index first bin
+    const abin = p.getBin(0);
+    expect(abin).toBeInstanceOf(PackingAlgorithm);
+
+    // Bin dimensions (bins can be reordered during packing)
+    const { width: binWidth, height: binHeight } = abin;
+    expect(binWidth).toEqual(50);
+    expect(binHeight).toEqual(50);
+
+    // Number of rectangles packed into the first bin
+    const nrect = abin.numberOfRectangles;
+    expect(nrect).toEqual(9);
+
+    // Second bin's rectangles
+    const rect = p.getBin(1).rectangles;
+    expect(rect).toBeInstanceOf(Array);
+
+    // Rectangle properties
+    const { x, y, width, height, rid } = rect[0];
+    expect(x).toBeGreaterThanOrEqual(0);
+    expect(y).toBeGreaterThanOrEqual(0);
+    expect(width).toBeGreaterThan(0);
+    expect(height).toBeGreaterThan(0);
+    expect(rid).toBeNull();
+
+    // for (const bin of p.binList()) {
+    //   for (const rect of bin.rectangles) {
+    //     console.log(rect);
+    //   }
+    // }
+
+    expect(p.binList()).toBeInstanceOf(Array);
+    expect(p.rectList()).toBeInstanceOf(Array);
   });
 
   test('BNF Big enough', () => {

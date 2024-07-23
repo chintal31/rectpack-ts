@@ -1,6 +1,7 @@
-import { PackerBNF, PackerBFF, PackerBBF } from '@src/packer';
+import { PackerBNF, PackerBFF, PackerBBF } from '@src/packer-mixins';
 import { MaxRectsBaf, MaxRectsBl, MaxRectsBssf } from '@src/max-rects';
 import { SORT_AREA, SORT_NONE } from '@src/sorting';
+import { Rectangle } from '@src/geometry';
 
 describe('TestPacker', () => {
   test('init', () => {
@@ -9,7 +10,7 @@ describe('TestPacker', () => {
     p.addBin(100, 10);
     p.addRect(10, 89);
     p.pack();
-    expect(p.rectList()[0]).toEqual([0, 0, 0, 89, 10, null]);
+    expect(p.rectList()[0]).toEqual({ binIndex: 0, x: 0, y: 0, width: 89, height: 10, rid: null });
 
     // Test default packing algo
     p = new PackerBFF();
@@ -31,11 +32,11 @@ describe('TestPacker', () => {
     p.addRect(60, 60);
     p.pack();
 
-    expect(p.rectList()).toContainEqual([0, 0, 0, 70, 70, null]);
-    expect(p.rectList()).toContainEqual([1, 0, 0, 90, 55, null]);
-    expect(p.rectList()).toContainEqual([2, 0, 0, 90, 90, null]);
-    expect(p.rectList()).toContainEqual([3, 0, 0, 55, 90, null]);
-    expect(p.rectList()).toContainEqual([4, 0, 0, 60, 60, null]);
+    expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 70, height: 70, rid: null });
+    expect(p.rectList()).toContainEqual({ binIndex: 1, x: 0, y: 0, width: 90, height: 55, rid: null });
+    expect(p.rectList()).toContainEqual({ binIndex: 2, x: 0, y: 0, width: 90, height: 90, rid: null });
+    expect(p.rectList()).toContainEqual({ binIndex: 3, x: 0, y: 0, width: 55, height: 90, rid: null });
+    expect(p.rectList()).toContainEqual({ binIndex: 4, x: 0, y: 0, width: 60, height: 60, rid: null });
 
     // Test custom packing algo is stored and used
     p = new PackerBFF({ packAlgo: MaxRectsBl });
@@ -57,10 +58,10 @@ describe('TestPacker', () => {
     p.addRect(60, 55);
     p.addRect(70, 90);
     p.pack();
-    expect(p.rectList()).toContainEqual([0, 0, 0, 90, 80, null]);
-    expect(p.rectList()).toContainEqual([1, 0, 0, 70, 90, null]);
-    expect(p.rectList()).toContainEqual([2, 0, 0, 60, 70, null]);
-    expect(p.rectList()).toContainEqual([3, 0, 0, 60, 55, null]);
+    expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 90, height: 80, rid: null });
+    expect(p.rectList()).toContainEqual({ binIndex: 1, x: 0, y: 0, width: 70, height: 90, rid: null });
+    expect(p.rectList()).toContainEqual({ binIndex: 2, x: 0, y: 0, width: 60, height: 70, rid: null });
+    expect(p.rectList()).toContainEqual({ binIndex: 3, x: 0, y: 0, width: 60, height: 55, rid: null });
 
     // check rectangle rotation can be disabled
     p = new PackerBFF({
@@ -137,9 +138,9 @@ describe('TestPacker', () => {
     p.pack();
 
     expect(p.binList().length).toBe(1);
-    expect(p.binList()[0][0]).toBe(50);
-    expect(p.binList()[0][1]).toBe(50);
-    expect(p.rectList()[0]).toEqual([0, 0, 0, 10, 20, null]);
+    expect(p.binList()[0].width).toBe(50);
+    expect(p.binList()[0].height).toBe(50);
+    expect(p.rectList()[0]).toEqual({ binIndex: 0, x: 0, y: 0, width: 10, height: 20, rid: null });
 
     // Test rectangles too big
     p = new PackerBFF();
@@ -173,11 +174,13 @@ describe('TestPacker', () => {
 
     expect(p.binList().length).toBe(2);
     expect(p.rectList().length).toBe(3);
-    expect(p.rectList()[0]).toEqual([0, 0, 0, 3, 3, null]);
-    expect(p.rectList()[1]).toEqual([0, 3, 0, 10, 10, null]);
-    expect(p.rectList()[2]).toEqual([1, 0, 0, 120, 100, null]);
-    expect(p.binList()[0]).toEqual([100, 100]);
-    expect(p.binList()[1]).toEqual([200, 200]);
+    expect(p.rectList()[0]).toEqual({ binIndex: 0, x: 0, y: 0, width: 3, height: 3, rid: null });
+    expect(p.rectList()[1]).toEqual({ binIndex: 0, x: 3, y: 0, width: 10, height: 10, rid: null });
+    expect(p.rectList()[2]).toEqual({ binIndex: 1, x: 0, y: 0, width: 120, height: 100, rid: null });
+
+    const binListRectangles = p.rectList().map((r) => new Rectangle(r.x, r.y, r.width, r.height, r.rid));
+    expect(p.binList()[0]).toEqual({ width: 100, height: 100, numberOfRectangles: 2, rectangles: [binListRectangles[0], binListRectangles[1]] });
+    expect(p.binList()[1]).toEqual({ width: 200, height: 200, numberOfRectangles: 1, rectangles: [binListRectangles[2]] });
   });
 
   test('repack', () => {
@@ -189,7 +192,8 @@ describe('TestPacker', () => {
 
     expect(p.rectList().length).toBe(1);
     expect(p.binList().length).toBe(1);
-    expect(p.rectList()).toContainEqual([0, 0, 0, 20, 20, null]);
+
+    expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 20, height: 20, rid: null });
 
     // Add more rectangles and re-pack
     p.addRect(10, 10);
@@ -197,8 +201,9 @@ describe('TestPacker', () => {
     p.pack();
     expect(p.rectList().length).toBe(2);
     expect(p.binList().length).toBe(1);
-    expect(p.rectList()).toContainEqual([0, 0, 0, 20, 20, null]);
-    expect(p.rectList()).toContainEqual([0, 20, 0, 10, 10, null]);
+
+    expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 20, height: 20, rid: null });
+    expect(p.rectList()).toContainEqual({ binIndex: 0, x: 20, y: 0, width: 10, height: 10, rid: null });
 
     // Add more bins and re-pack
     p.addBin(70, 70);
@@ -206,9 +211,9 @@ describe('TestPacker', () => {
     p.pack();
     expect(p.rectList().length).toBe(3);
     expect(p.binList().length).toBe(2);
-    expect(p.rectList()).toContainEqual([0, 0, 0, 20, 20, null]);
-    expect(p.rectList()).toContainEqual([0, 20, 0, 10, 10, null]);
-    expect(p.rectList()).toContainEqual([1, 0, 0, 70, 50, null]);
+    expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 20, height: 20, rid: null });
+    expect(p.rectList()).toContainEqual({ binIndex: 0, x: 20, y: 0, width: 10, height: 10, rid: null });
+    expect(p.rectList()).toContainEqual({ binIndex: 1, x: 0, y: 0, width: 70, height: 50, rid: null });
 
     // check rectangles are sorted before a repack
     p = new PackerBNF({ rotation: false, sortAlgo: SORT_AREA });
@@ -220,15 +225,16 @@ describe('TestPacker', () => {
     p.addRect(80, 80);
     p.pack();
 
-    expect(p.rectList()).toContainEqual([0, 0, 0, 80, 80, null]);
-    expect(p.rectList()).toContainEqual([1, 0, 0, 70, 70, null]);
+    expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 80, height: 80, rid: null });
+    expect(p.rectList()).toContainEqual({ binIndex: 1, x: 0, y: 0, width: 70, height: 70, rid: null });
 
     // add bigger rectangle and repack
     p.addRect(90, 90);
     p.pack();
-    expect(p.rectList()).toContainEqual([0, 0, 0, 90, 90, null]);
-    expect(p.rectList()).toContainEqual([1, 0, 0, 80, 80, null]);
-    expect(p.rectList()).toContainEqual([2, 0, 0, 70, 70, null]);
+
+    expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 90, height: 90, rid: null });
+    expect(p.rectList()).toContainEqual({ binIndex: 1, x: 0, y: 0, width: 80, height: 80, rid: null });
+    expect(p.rectList()).toContainEqual({ binIndex: 2, x: 0, y: 0, width: 70, height: 70, rid: null });
   });
 
   describe('PackerBNF', () => {
@@ -246,16 +252,16 @@ describe('TestPacker', () => {
       p.addRect(10, 10);
       p.pack();
 
-      expect(p.rectList()).toContainEqual([0, 0, 0, 40, 40, null]);
-      expect(p.rectList()).toContainEqual([1, 0, 0, 90, 90, null]);
-      expect(p.rectList()).toContainEqual([1, 90, 0, 5, 5, null]);
-      expect(p.rectList()).toContainEqual([2, 0, 0, 20, 20, null]);
-      expect(p.rectList()).toContainEqual([2, 20, 0, 10, 10, null]);
+      expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 40, height: 40, rid: null });
+      expect(p.rectList()).toContainEqual({ binIndex: 1, x: 0, y: 0, width: 90, height: 90, rid: null });
+      expect(p.rectList()).toContainEqual({ binIndex: 1, x: 90, y: 0, width: 5, height: 5, rid: null });
+      expect(p.rectList()).toContainEqual({ binIndex: 2, x: 0, y: 0, width: 20, height: 20, rid: null });
+      expect(p.rectList()).toContainEqual({ binIndex: 2, x: 20, y: 0, width: 10, height: 10, rid: null });
 
       expect(p.binList().length).toBe(3);
-      expect(p.binList()[0][0]).toBe(50);
-      expect(p.binList()[1][0]).toBe(100);
-      expect(p.binList()[2][0]).toBe(50);
+      expect(p.binList()[0].width).toBe(50);
+      expect(p.binList()[1].width).toBe(100);
+      expect(p.binList()[2].width).toBe(50);
     });
 
     test('repack', () => {
@@ -265,13 +271,14 @@ describe('TestPacker', () => {
       p.addRect(20, 20);
       p.pack();
 
-      expect(p.rectList()).toContainEqual([0, 0, 0, 20, 20, null]);
+      expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 20, height: 20, rid: null });
 
       // Add rectangles and repack
       p.addRect(80, 80);
       p.pack();
-      expect(p.rectList()).toContainEqual([0, 0, 0, 20, 20, null]);
-      expect(p.rectList()).toContainEqual([0, 20, 0, 80, 80, null]);
+
+      expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 20, height: 20, rid: null });
+      expect(p.rectList()).toContainEqual({ binIndex: 0, x: 20, y: 0, width: 80, height: 80, rid: null });
     });
 
     test('repack rectangle sort', () => {
@@ -285,15 +292,16 @@ describe('TestPacker', () => {
       p.addRect(80, 80);
       p.pack();
 
-      expect(p.rectList()).toContainEqual([0, 0, 0, 80, 80, null]);
-      expect(p.rectList()).toContainEqual([1, 0, 0, 70, 70, null]);
+      expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 80, height: 80, rid: null });
+      expect(p.rectList()).toContainEqual({ binIndex: 1, x: 0, y: 0, width: 70, height: 70, rid: null });
 
       // add bigger rectangle and repack
       p.addRect(90, 90);
       p.pack();
-      expect(p.rectList()).toContainEqual([0, 0, 0, 90, 90, null]);
-      expect(p.rectList()).toContainEqual([1, 0, 0, 80, 80, null]);
-      expect(p.rectList()).toContainEqual([2, 0, 0, 70, 70, null]);
+
+      expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 90, height: 90, rid: null });
+      expect(p.rectList()).toContainEqual({ binIndex: 1, x: 0, y: 0, width: 80, height: 80, rid: null });
+      expect(p.rectList()).toContainEqual({ binIndex: 2, x: 0, y: 0, width: 70, height: 70, rid: null });
     });
   });
 
@@ -309,7 +317,7 @@ describe('TestPacker', () => {
       p.addRect(90, 90);
       p.pack();
       expect(p.binList().length).toBe(1);
-      expect(p.binList()[0][0]).toBe(100);
+      expect(p.binList()[0].width).toBe(100);
 
       // rectangles are packed into open bins whenever possible
       p.addRect(10, 10);
@@ -333,7 +341,8 @@ describe('TestPacker', () => {
       p.pack();
       expect(p.binList().length).toBe(2);
       expect(p.rectList().length).toBe(5);
-      expect(p.rectList()).toContainEqual([0, 90, 10, 5, 5, null]);
+
+      expect(p.rectList()).toContainEqual({ binIndex: 0, x: 90, y: 10, width: 5, height: 5, rid: null });
     });
   });
 
@@ -351,19 +360,20 @@ describe('TestPacker', () => {
       p.addRect(50, 30);
       p.pack();
       expect(p.binList().length).toBe(1);
-      expect(p.binList()[0][0]).toBe(55);
+      expect(p.binList()[0].width).toBe(55);
 
       // Another bin is opened when it doesn't fit into the first one
       p.addRect(50, 30);
       p.pack();
       expect(p.binList().length).toBe(2);
-      expect(p.binList()[1][0]).toBe(50);
+      expect(p.binList()[1].width).toBe(50);
 
       // Rectangle is placed into the bin with the best fitness, not the first one where it fits.
       p.addRect(20, 20);
       p.pack();
       expect(p.binList().length).toBe(2);
-      expect(p.rectList()).toContainEqual([1, 0, 30, 20, 20, null]);
+
+      expect(p.rectList()).toContainEqual({ binIndex: 1, x: 0, y: 30, width: 20, height: 20, rid: null });
     });
 
     test('repack rectangle sort', () => {
@@ -377,15 +387,16 @@ describe('TestPacker', () => {
       p.addRect(80, 80);
       p.pack();
 
-      expect(p.rectList()).toContainEqual([0, 0, 0, 80, 80, null]);
-      expect(p.rectList()).toContainEqual([1, 0, 0, 70, 70, null]);
+      expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 80, height: 80, rid: null });
+      expect(p.rectList()).toContainEqual({ binIndex: 1, x: 0, y: 0, width: 70, height: 70, rid: null });
 
       // Add a bigger rectangle and repack
       p.addRect(90, 90);
       p.pack();
-      expect(p.rectList()).toContainEqual([0, 0, 0, 90, 90, null]);
-      expect(p.rectList()).toContainEqual([1, 0, 0, 80, 80, null]);
-      expect(p.rectList()).toContainEqual([2, 0, 0, 70, 70, null]);
+
+      expect(p.rectList()).toContainEqual({ binIndex: 0, x: 0, y: 0, width: 90, height: 90, rid: null });
+      expect(p.rectList()).toContainEqual({ binIndex: 1, x: 0, y: 0, width: 80, height: 80, rid: null });
+      expect(p.rectList()).toContainEqual({ binIndex: 2, x: 0, y: 0, width: 70, height: 70, rid: null });
     });
   });
 });
