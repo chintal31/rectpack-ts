@@ -139,7 +139,16 @@ A more detailed description of API calls:
   Starts the packing process.
 
 - `packer.rectList()`:  
-  Returns the list of packed rectangles, each represented by the array `[ binIndex, x, y, width, height, id ]`.
+  Returns the list of packed rectangles, each represented by the object `{ binIndex, x, y, width, height, rid }`.
+
+- `packer.getBin(index)`:  
+  Returns the bin at specified index.
+
+- `packer.binList()`:  
+  Returns the list of bins, each represented by the object `{ width, height, numberOfRectangles, rectangles: [{ x, y, width, height, rid }] }`.
+
+- `packer.reset()`:  
+  Resets all added bins, rectangles and its packing.
 
 ## Testing
 
