@@ -67,22 +67,27 @@ const { width, height } = abin;
 // Number of rectangles packed into the first bin
 const nrect = abin.numberOfRectangles;
 
-// Second bin's first rectangle
-const rect = packer.getBin(1)[0];
+// Second bin's rectangles
+const rect = packer.getBin(1).rectangles;
 
 // Rectangle properties
-const [x, y, width, height] = rect;
+const { x, y, width, height, rid } = rect[0];
 ```
 
 Looping over all bins and rectangles:
 
 ```typescript
 for (const bin of packer.binList()) {
-  console.log(bin.id); // Bin id if it has one
-  for (const rect of bin.rectList()) {
+  for (const rect of bin.rectangles) {
     console.log(rect);
   }
 }
+```
+
+or all rectangles
+
+```typescript
+p.rectList();
 ```
 
 All dimensions (bins and rectangles) must be integers or decimals to avoid collisions caused by floating-point rounding.

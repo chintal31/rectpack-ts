@@ -1,4 +1,4 @@
-import { PackerRect } from '@src/packer';
+import { PackerRect } from '@src/types';
 import { SORT_NONE, SORT_AREA, SORT_PERI, SORT_DIFF, SORT_SSIDE, SORT_LSIDE, SORT_RATIO } from '@src/sorting';
 
 describe('Sorter Tests', () => {
