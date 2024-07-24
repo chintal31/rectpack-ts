@@ -1,5 +1,5 @@
 {
-  "name": "rectpack",
+  "name": "rectpack-ts",
   "version": "0.0.1",
   "description": "",
   "main": "dist/src/index.js",
@@ -17,7 +17,7 @@
     "bin",
     "packing",
     "knapsack",
-    "rectpack"
+    "rectpack-ts"
   ],
   "author": "Chintal Dholakiya chintal3198@gmail.com",
   "license": "UNLICENSED",

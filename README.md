@@ -1,6 +1,6 @@
-# Rectpack
+# Rectpack-TS
 
-Rectpack is a TypeScript library that implements heuristic algorithms for solving the 2D knapsack problem, also known as the bin packing problem. This involves packing a set of rectangles into the smallest number of bins.
+Rectpack-ts is a TypeScript library that implements heuristic algorithms for solving the 2D knapsack problem, also known as the bin packing problem. This involves packing a set of rectangles into the smallest number of bins.
 
 ## Credits
 
@@ -8,10 +8,10 @@ This TypeScript library is a port of the Python library [rectpack](https://githu
 
 ## Installation
 
-To install rectpack, use npm:
+To install rectpack-ts, use npm:
 
 ```bash
-npm install rectpack
+npm install rectpack-ts
 ```
 
 ## Basic Usage
@@ -19,7 +19,7 @@ npm install rectpack
 Packing rectangles into a number of bins is easy:
 
 ```typescript
-import { Packer, MaxRectsBaf } from 'rectpack';
+import { Packer, MaxRectsBaf } from 'rectpack-ts';
 
 const rectangles = [
   { width: 100, height: 30 },
