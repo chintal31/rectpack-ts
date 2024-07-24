@@ -1,5 +1,5 @@
-import { MaxRects, MaxRectsBaf, MaxRectsBl, MaxRectsBlsf, MaxRectsBssf } from '@src/max-rects';
-import { Rectangle } from '@src/geometry';
+import { MaxRects, MaxRectsBaf, MaxRectsBl, MaxRectsBlsf, MaxRectsBssf } from '../max-rects';
+import { Rectangle } from '../geometry';
 
 describe('MaxRects', () => {
   test('init', () => {
@@ -64,7 +64,7 @@ describe('MaxRects', () => {
     expect(m.addRect(10, 15)).not.toBeNull();
     expect(m.addRect(40, 40)).not.toBeNull();
 
-    const rectangles = [];
+    const rectangles: { width: number; height: number; rid?: string }[] = [];
     for (const r of m) {
       rectangles.push(r);
     }
@@ -296,8 +296,8 @@ describe('MaxRectsBaf', () => {
     const m = new MaxRectsBaf(100, 100, false);
     expect(m.addRect(60, 10)).toEqual(new Rectangle(0, 0, 60, 10));
 
-    expect(m.fitness(40, 40)).toBeLessThan(m.fitness(50, 50));
-    expect(m.fitness(40, 40)).toBeLessThan(m.fitness(35, 35));
+    expect(m.fitness(40, 40)).toBeLessThan(<number>m.fitness(50, 50));
+    expect(m.fitness(40, 40)).toBeLessThan(<number>m.fitness(35, 35));
     expect(m.addRect(40, 40)).toEqual(new Rectangle(60, 0, 40, 40));
   });
 });
@@ -307,8 +307,8 @@ describe('MaxRectsBlsf', () => {
     const m = new MaxRectsBlsf(100, 100, false);
     expect(m.addRect(60, 10)).toEqual(new Rectangle(0, 0, 60, 10));
 
-    expect(m.fitness(30, 90)).toBeLessThan(m.fitness(40, 89));
-    expect(m.fitness(99, 10)).toBeLessThan(m.fitness(99, 5));
+    expect(m.fitness(30, 90)).toBeLessThan(<number>m.fitness(40, 89));
+    expect(m.fitness(99, 10)).toBeLessThan(<number>m.fitness(99, 5));
   });
 });
 
@@ -317,8 +317,8 @@ describe('MaxRectsBssf', () => {
     const m = new MaxRectsBssf(100, 100, false);
     expect(m.addRect(60, 10)).toEqual(new Rectangle(0, 0, 60, 10));
 
-    expect(m.fitness(30, 91)).toBeGreaterThan(m.fitness(30, 92));
-    expect(m.fitness(38, 91)).toBeLessThan(m.fitness(30, 92));
-    expect(m.fitness(38, 91)).toBeGreaterThan(m.fitness(40, 92));
+    expect(m.fitness(30, 91)).toBeGreaterThan(<number>m.fitness(30, 92));
+    expect(m.fitness(38, 91)).toBeLessThan(<number>m.fitness(30, 92));
+    expect(m.fitness(38, 91)).toBeGreaterThan(<number>m.fitness(40, 92));
   });
 });

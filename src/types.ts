@@ -1,7 +1,7 @@
-import { Rectangle } from '@src/geometry';
-import { PackerBBF, PackerBNF, PackerBFF } from '@src/packer-mixins';
-import { MaxRectsBaf, MaxRectsBl, MaxRectsBlsf, MaxRectsBssf } from '@src/max-rects';
-import { SORT_AREA, SORT_PERI, SORT_DIFF, SORT_SSIDE, SORT_LSIDE, SORT_RATIO, SORT_NONE } from '@src/sorting';
+import { Rectangle } from './geometry';
+import { PackerBBF, PackerBNF, PackerBFF } from './packer-mixins';
+import { MaxRectsBaf, MaxRectsBl, MaxRectsBlsf, MaxRectsBssf } from './max-rects';
+import { SORT_AREA, SORT_PERI, SORT_DIFF, SORT_SSIDE, SORT_LSIDE, SORT_RATIO, SORT_NONE } from './sorting';
 
 type PackerBin = [number, number, number, string | null];
 type PackerRect = [number, number, string | null];

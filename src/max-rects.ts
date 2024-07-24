@@ -1,5 +1,5 @@
-import { Rectangle } from '@src/geometry';
-import { PackingAlgorithm } from '@src/packing-algorithm';
+import { Rectangle } from './geometry';
+import { PackingAlgorithm } from './packing-algorithm';
 
 class MaxRects extends PackingAlgorithm {
   protected _maxRects: Rectangle[];

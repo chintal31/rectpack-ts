@@ -1,9 +1,9 @@
-import { BinFactory } from '@src/bin-factory';
-import { MaxRectsBssf } from '@src/max-rects';
-import { SORT_NONE, Sorting } from '@src/sorting';
-import { RectangleWithBinCount, BinSummary, PackingAlgorithmClass, PackerRect, PackerBin } from '@src/types';
-import { PackingAlgorithm as Bin } from '@src/packing-algorithm';
-import { PackerBBFMixin, PackerBFFMixin, PackerBNFMixin } from '@src/packer-mixins';
+import { BinFactory } from './bin-factory';
+import { MaxRectsBssf } from './max-rects';
+import { SORT_NONE } from './sorting';
+import { RectangleWithBinCount, BinSummary, PackingAlgorithmClass, PackerRect, PackerBin, Sorting } from './types';
+import { PackingAlgorithm as Bin } from './packing-algorithm';
+import { PackerBBFMixin, PackerBFFMixin, PackerBNFMixin } from './packer-mixins';
 
 class PackerOnline {
   private _rotation: boolean;

@@ -1,7 +1,7 @@
-import { PackerBNF, PackerBFF, PackerBBF } from '@src/packer-mixins';
-import { MaxRectsBaf, MaxRectsBl, MaxRectsBssf } from '@src/max-rects';
-import { SORT_AREA, SORT_NONE } from '@src/sorting';
-import { Rectangle } from '@src/geometry';
+import { PackerBNF, PackerBFF, PackerBBF } from '../packer-mixins';
+import { MaxRectsBaf, MaxRectsBl, MaxRectsBssf } from '../max-rects';
+import { SORT_AREA, SORT_NONE } from '../sorting';
+import { Rectangle } from '../geometry';
 
 describe('TestPacker', () => {
   test('init', () => {

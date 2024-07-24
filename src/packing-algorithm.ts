@@ -1,4 +1,4 @@
-import { Rectangle } from '@src/geometry';
+import { Rectangle } from './geometry';
 
 abstract class PackingAlgorithm {
   width: number;

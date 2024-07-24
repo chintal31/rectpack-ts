@@ -1,9 +1,9 @@
-import { PackingAlgorithm as Bin } from '@src/packing-algorithm';
-import { SORT_AREA, Sorting } from '@src/sorting';
-import { MaxRectsBssf } from '@src/max-rects';
-import { RectangleWithBinCount, BinSummary, PackageBin, PackingAlgorithmClass } from '@src/types';
-import { PackerBase } from '@src/packer-base';
-import { PackerBBF } from '@src/packer-mixins';
+import { PackingAlgorithm as Bin } from './packing-algorithm';
+import { SORT_AREA } from './sorting';
+import { MaxRectsBssf } from './max-rects';
+import { RectangleWithBinCount, BinSummary, PackageBin, PackingAlgorithmClass, Sorting } from './types';
+import { PackerBase } from './packer-base';
+import { PackerBBF } from './packer-mixins';
 
 class Packer {
   private packerInstance: PackerBase;

@@ -1,6 +1,6 @@
-import { PackerOnline, PackerBase } from '@src/packer-base';
-import { Constructor } from '@src/types';
-import { PackingAlgorithm as Bin } from '@src/packing-algorithm';
+import { PackerOnline, PackerBase } from './packer-base';
+import { Constructor } from './types';
+import { PackingAlgorithm as Bin } from './packing-algorithm';
 
 class PackerBBFMixin extends PackerOnline {
   // Define item getter function (equivalent to Python's operator.itemgetter)

@@ -1,5 +1,5 @@
-import { PackingAlgorithm as Bin } from '@src/packing-algorithm';
-import { PackingAlgorithmClass } from '@src/types';
+import { PackingAlgorithm as Bin } from './packing-algorithm';
+import { PackingAlgorithmClass } from './types';
 
 class BinFactory {
   private _width: number;

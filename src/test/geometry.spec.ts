@@ -1,4 +1,4 @@
-import { Point, Rectangle } from '@src/geometry';
+import { Point, Rectangle } from '../geometry';
 
 describe('Point', () => {
   it('should initialize correctly', () => {

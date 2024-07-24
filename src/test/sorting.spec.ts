@@ -1,5 +1,5 @@
-import { PackerRect } from '@src/types';
-import { SORT_NONE, SORT_AREA, SORT_PERI, SORT_DIFF, SORT_SSIDE, SORT_LSIDE, SORT_RATIO } from '@src/sorting';
+import { PackerRect } from '../types';
+import { SORT_NONE, SORT_AREA, SORT_PERI, SORT_DIFF, SORT_SSIDE, SORT_LSIDE, SORT_RATIO } from '../sorting';
 
 describe('Sorter Tests', () => {
   // Test for SORT_NONE

@@ -1,7 +1,7 @@
-import { Packer } from '@src/packer';
-import { PackerBBF, PackerBNF, PackerBFF } from '@src/packer-mixins';
-import { PackingAlgorithm } from '@src/packing-algorithm';
-import { PackageBin } from '@src/types';
+import { Packer } from '../packer';
+import { PackerBBF, PackerBNF, PackerBFF } from '../packer-mixins';
+import { PackingAlgorithm } from '../packing-algorithm';
+import { PackageBin } from '../types';
 
 function common(binAlgo: PackageBin, binWidth: number, binHeight: number, rectangles: [number, number][]): Packer {
   const p = new Packer({ binAlgo });
