@@ -1,5 +1,5 @@
 import { PackerOnline, PackerBase } from './packer-base';
-import { Constructor } from './types';
+import { Constructor, PackingAlgorithmClass, Sorting } from './types';
 import { PackingAlgorithm as Bin } from './packing-algorithm';
 
 class PackerBBFMixin extends PackerOnline {
@@ -113,15 +113,21 @@ const firstItem = (array: [number, Bin]): number => {
 };
 
 class PackerBBF extends PackerBase {
-  // Empty class but will have methods from PackerBBFMixin via mixin
+  constructor(options: { packAlgo?: PackingAlgorithmClass; sortAlgo?: Sorting; rotation?: boolean } = {}) {
+    super(options);
+  }
 }
 
 class PackerBNF extends PackerBase {
-  // Empty class but will have methods from PackerBNFMixin via mixin
+  constructor(options: { packAlgo?: PackingAlgorithmClass; sortAlgo?: Sorting; rotation?: boolean } = {}) {
+    super(options);
+  }
 }
 
 class PackerBFF extends PackerBase {
-  // Empty class but will have methods from PackerBFFMixin via mixin
+  constructor(options: { packAlgo?: PackingAlgorithmClass; sortAlgo?: Sorting; rotation?: boolean } = {}) {
+    super(options);
+  }
 }
 
 applyMixins(PackerBBF, [PackerBBFMixin]);

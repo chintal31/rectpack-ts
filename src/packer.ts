@@ -19,7 +19,7 @@ class Packer {
     sortAlgo?: Sorting;
     rotation?: boolean;
   } = {}) {
-    this.packerInstance = new binAlgo(packAlgo, sortAlgo, rotation);
+    this.packerInstance = new binAlgo({ packAlgo, sortAlgo, rotation });
   }
 
   get numberOfBins() {
